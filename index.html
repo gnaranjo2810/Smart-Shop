@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartShop Finder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo" onclick="appState.navigate('home')">
+                <div class="logo-icon">
+                    <div class="logo-inner">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 6L4 20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2L19 6"></path>
+                            <path d="M5 6h14"></path>
+                            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                            <line x1="12" y1="10" x2="12" y2="16"></line>
+                            <line x1="10" y1="16" x2="14" y2="16"></line>
+                            <line x1="8" y1="11" x2="16" y2="11"></line>
+                            <path d="M8 11l-1.5 3h3L8 11z" fill="currentColor"></path>
+                            <path d="M16 11l-1.5 3h3L16 11z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                </div>
+                SmartShop
+            </a>
+            <div class="nav-links">
+                <a class="nav-link" id="nav-results" onclick="appState.navigate('results')">Browse All</a>
+                <a class="nav-link" id="nav-about" onclick="appState.navigate('about')">About Us</a>
+                <button class="compare-btn" onclick="appState.navigate('compare')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Compare
+                    <span id="nav-compare-count" class="compare-badge hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-root" class="container">
+        <!-- Content will be injected here by app.js -->
+    </main>
+
+    <div id="loading-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px);">
+        <div class="spinner"
+            style="width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1.5rem;">
+        </div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;" id="loading-title">Analyzing External Link...</h2>
+        <p style="color: var(--text-secondary);" id="loading-text" style="max-width: 400px; text-align: center;">
+            Extracting product data and running comparison analysis...</p>
+        <style>
+            @keyframes spin {
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </div>
+
+    <!-- Templates for Views -->
+
+    <template id="tpl-home">
+        <div class="hero">
+            <h1>Find the <span class="text-gradient">perfect product</span> in seconds.</h1>
+            <p>Tell us what you're looking for, and our smart engine will recommend the absolute best matches based on
+                quality, value, and reviews.</p>
+
+            <form class="search-form"
+                onsubmit="event.preventDefault(); appState.handleSearch(document.getElementById('home-search').value);">
+                <div class="search-form-bg"></div>
+                <div class="search-input-wrapper">
+                    <input type="text" id="home-search" placeholder="What are you looking for?">
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
+            </form>
+
+            <div class="link-analyzer-container"
+                style="margin-top: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto; text-align: left;">
+                <p
+                    style="color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
+                        stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    Or paste a link to analyze and compare:
+                </p>
+                <form class="search-form" style="padding: 0.5rem;"
+                    onsubmit="event.preventDefault(); appState.handleLinkAnalysis(document.getElementById('link-analyzer').value);">
+                    <div class="search-form-bg"
+                        style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color);"></div>
+                    <div class="search-input-wrapper" style="gap: 0.5rem;">
+                        <input type="url" id="link-analyzer" placeholder="e.g. https://www.amazon.com/dp/..." required
+                            style="background: transparent; color: white;">
+                        <button type="submit" class="search-btn"
+                            style="background: var(--gradient-brand); padding: 0.75rem 1.5rem; font-size: 0.875rem; white-space: nowrap;">Analyze</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <section style="margin-top: 4rem;">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">🔥 Trending Now</h2>
+                    <p class="section-subtitle">The highest rated products everyone is buying</p>
+                </div>
+                <button class="btn btn-outline" onclick="appState.navigate('results')">View All</button>
+            </div>
+            <div id="grid-trending" class="grid grid-cols-4"></div>
+        </section>
+
+        <section style="margin-top: 4rem;">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">💰 Biggest Discounts</h2>
+                    <p class="section-subtitle">Premium quality at unbeatable prices</p>
+                </div>
+            </div>
+            <div id="grid-discounts" class="grid grid-cols-4"></div>
+        </section>
+
+        <section style="margin-top: 4rem; margin-bottom: 4rem;">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">📦 Most Purchased</h2>
+                    <p class="section-subtitle">Tested and trusted by thousands</p>
+                </div>
+            </div>
+            <div id="grid-purchased" class="grid grid-cols-4"></div>
+        </section>
+    </template>
+
+    <template id="tpl-results">
+        <div class="results-layout mb-8">
+            <aside class="sidebar">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Filters</h3>
+
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select id="filter-category" class="filter-select"
+                        onchange="appState.updateFilters('category', this.value)">
+                        <option value="">All Categories</option>
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" id="lbl-maxp">Maximum Price: $2000</label>
+                    <input type="range" id="filter-maxp" class="filter-range" min="10" max="2000" step="10" value="2000"
+                        oninput="document.getElementById('lbl-maxp').innerText = `Maximum Price: $${this.value}`; appState.updateFilters('maxPrice', this.value)">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Minimum Quality</label>
+                    <select id="filter-quality" class="filter-select"
+                        onchange="appState.updateFilters('quality', this.value)">
+                        <option value="">Any Quality</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Luxury">Luxury</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" id="lbl-maxs">Max Shipping: 14 days</label>
+                    <input type="range" id="filter-maxs" class="filter-range" min="1" max="14" value="14"
+                        oninput="document.getElementById('lbl-maxs').innerText = `Max Shipping: ${this.value} days`; appState.updateFilters('maxShippingDays', this.value)">
+                </div>
+
+                <button class="btn btn-outline" style="width: 100%;" onclick="appState.resetFilters()">Reset
+                    Filters</button>
+            </aside>
+
+            <main class="results-main">
+                <div style="margin-bottom: 2rem;">
+                    <h1 id="results-title" class="section-title">All Products</h1>
+                    <p id="results-count" class="section-subtitle">Found X products</p>
+                </div>
+
+                <div id="best-overall-container"></div>
+
+                <div id="grid-results" class="grid grid-cols-4"></div>
+            </main>
+        </div>
+    </template>
+
+    <template id="tpl-details">
+        <div style="margin-bottom: 2rem;">
+            <button class="btn btn-outline" onclick="appState.navigate('results')">← Back to Results</button>
+        </div>
+        <div id="details-content"></div>
+    </template>
+
+    <template id="tpl-compare">
+        <div class="section-header">
+            <div>
+                <h1 class="section-title">Compare Products</h1>
+                <p class="section-subtitle">Compare specs side-by-side</p>
+            </div>
+            <button class="btn btn-outline" onclick="appState.clearCompare()">Clear All</button>
+        </div>
+        <div style="overflow-x: auto; padding-bottom: 2rem;">
+            <table class="compare-table" id="compare-table">
+                <!-- table injected by JS -->
+            </table>
+        </div>
+    </template>
+
+    <template id="tpl-about">
+        <div class="about-hero">
+            <div class="about-logo-wrapper">
+                <div class="about-logo-inner">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 6L4 20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2L19 6"></path>
+                        <path d="M5 6h14"></path>
+                        <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                        <line x1="12" y1="10" x2="12" y2="16"></line>
+                        <line x1="10" y1="16" x2="14" y2="16"></line>
+                        <line x1="8" y1="11" x2="16" y2="11"></line>
+                        <path d="M8 11l-1.5 3h3L8 11z" fill="currentColor"></path>
+                        <path d="M16 11l-1.5 3h3L16 11z" fill="currentColor"></path>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="about-title">SmartShop Finder</h1>
+            <p class="about-subtitle">The ultimate intelligent tool designed to help you discover the perfect products by rapidly matching quality, value, and verified reviews.</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </div>
+                <h3 class="about-card-title">About the App</h3>
+                <p class="about-card-desc">SmartShop Finder solves the modern problem of online shopping fatigue. Instead of infinitely scrolling through endless options, our platform aggregates the best products, ranks them using intelligent algorithms, and presents them in a clean, intuitive interface. We take the guesswork out of value, quality, and shipping times.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h3 class="about-card-title">Who It’s For</h3>
+                <p class="about-card-desc">Designed for smart consumers, students, busy professionals, and general users who value their time and budget. Whether you're looking for the absolute best deal or prioritizing premium quality with fast shipping, our app adapts to your specific priorities instantly.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <h3 class="about-card-title">Tools & Technologies Used</h3>
+                <p class="about-card-desc">Built purely with fundamental web technologies for lightning-fast performance:</p>
+                <ul class="tech-list">
+                    <li class="tech-item"><div class="tech-dot"></div><div><strong>HTML5</strong> for semantic and accessible structure.</div></li>
+                    <li class="tech-item"><div class="tech-dot" style="background:var(--accent-pink)"></div><div><strong>CSS3 Variables & Grid</strong> for premium, responsive styling.</div></li>
+                    <li class="tech-item"><div class="tech-dot" style="background:var(--accent-amber)"></div><div><strong>Vanilla JavaScript</strong> for reactive client-side logic.</div></li>
+                </ul>
+            </div>
+
+            <div class="about-card">
+                <div class="about-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                </div>
+                <h3 class="about-card-title">How It Works (Code Overview)</h3>
+                <p class="about-card-desc">The frontend dynamically updates the Document Object Model (DOM) using JavaScript to create a Single Page Application feel. Product data is handled in memory, filtered based on user input, and rendered dynamically without reloading the page. Logic handles smart ranking, search algorithms, and responsive UI states.</p>
+            </div>
+
+            <div class="about-card author-card">
+                <div class="author-avatar">GN</div>
+                <div class="author-info">
+                    <h3>Gerardo Naranjo Martinez</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Lead Developer & Designer</p>
+                    <span class="badge badge-primary">12th Grade Student</span>
+                    <span class="badge badge-secondary" style="margin-left: 0.5rem;">MkrSpace – ATS 2026</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
