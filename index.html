@@ -45,9 +45,21 @@
         </div>
     </nav>
 
-    <main id="app-root" class="container">
+    <main id="app-root" class="container" style="min-height: 70vh;">
         <!-- Content will be injected here by app.js -->
     </main>
+
+    <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; margin-top: 4rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+            <a href="#" onclick="appState.navigate('home'); window.scrollTo({top: 0, behavior: 'smooth'}); return false;" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-secondary)'">
+                <span>&larr;</span> Back to Home Page
+            </a>
+            <div style="opacity: 0.8; display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.5rem; cursor: default;">
+                <p style="margin: 0;">Created on March 19, 2026</p>
+                <p style="margin: 0;">&copy; 2026 SmartShop &middot; Created with Antigravity</p>
+            </div>
+        </div>
+    </footer>
 
     <div id="loading-overlay"
         style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px);">
